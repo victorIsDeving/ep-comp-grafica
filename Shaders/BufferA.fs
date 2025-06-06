@@ -33,7 +33,7 @@ struct Surface {
     float d;
 };
 
-
+// Rotacionar em X
 mat4 rotX (in float angle)
 {
     float rad = radians (angle);
@@ -48,6 +48,7 @@ mat4 rotX (in float angle)
     return mat;
 }
 
+// Rotacionar em Y
 mat4 rotY (in float angle)
 {
     float rad = radians (angle);
@@ -62,6 +63,7 @@ mat4 rotY (in float angle)
     return mat;
 }
 
+// Rotacionar em Z
 mat4 rotZ (in float angle)
 {
     float rad = radians (angle);
@@ -76,19 +78,21 @@ mat4 rotZ (in float angle)
     return mat;
 }
 
-// Tarefa
-
-//Operaçoes  de translação
-
-// Operações de escala
-
 vec3 opTransf (vec3 p, mat4 m)
 {
     return vec4 (m * vec4 (p, 1.)).xyz;
 }
 
-
-
+//caixa para os prédios
+float sdBox(vec3 p, vec3 b) {
+    vec3 q = abs(p) - b;
+    return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0);
+}
+//chão com grama
+float sdWavyGround(vec3 p) {
+    float height = 0.1 * sin(p.x * 0.5) * sin(p.z * 0.5);
+    return p.y - height;
+}
 
 float sphereDist(vec3 p,vec4 cr)
 {
@@ -111,15 +115,26 @@ Surface unionS(Surface s1,Surface s2)
 {
     return (s1.d<s2.d)? s1:s2;
 }
+
 Surface getSceneDist(vec3 p)
 {
-    Surface Sphere;
-    Sphere.color= vec3(1.0,0.0,0.0);
-    Sphere.d = sphereDist(p,vec4(0.0,1.0,5.0,1.0));
-    Surface Plane;
-    Plane.color=vec3(0.7);
-    Plane.d = planeDist(p,vec4(0.0,1.0,0.0,0.0));
-    return unionS(Plane,Sphere);
+    // Titanic
+    vec3 titanicPosition = vec3(0.0, 1.5, 5.0);
+    vec3 titanicSize = vec3(0.7, 1.5, 1.3);
+    vec3 centered = p - titanicPosition - vec3(0.0, titanicSize.y, 0.0);
+    mat4 rot = rotY(radians(90.0));
+    vec3 q = opTransf(centered, rot);
+    float titanic = sdBox(q + vec3(0.0, titanicSize.y, 0.0), titanicSize);
+    Surface Titanic;
+    Titanic.color = vec3(0.8, 0.7, 0.6); // Beige color
+    Titanic.d = titanic;
+
+    // chão
+    Surface Ground;
+    Ground.color = vec3(0.3, 0.6, 0.2);
+    Ground.d = sdWavyGround(p);
+
+    return unionS(Ground, Titanic);
 }
 
 Surface rayMarching(vec3 ro,vec3 rd)
