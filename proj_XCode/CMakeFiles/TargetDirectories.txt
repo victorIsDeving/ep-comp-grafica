@@ -1,0 +1,3 @@
+/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode/CMakeFiles/RayMarching.dir
+/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode/CMakeFiles/ALL_BUILD.dir
+/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode/CMakeFiles/ZERO_CHECK.dir

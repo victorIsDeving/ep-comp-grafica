@@ -1,0 +1,871 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		4268FF9D686D1FCAF256854F /* ZERO_CHECK */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = F1F9EB9B7AF04829AAFD0474 /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */;
+			buildPhases = (
+				C06970CA42ADAFDC55BAE344 /* Generate CMakeFiles/ZERO_CHECK */,
+			);
+			dependencies = (
+			);
+			name = ZERO_CHECK;
+			productName = ZERO_CHECK;
+		};
+		CD2D336B00E732D5EEC43A8F /* ALL_BUILD */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = D61A30D0B0A24AC0A566C738 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */;
+			buildPhases = (
+				B93A90F07D4200851EA98DF1 /* Generate CMakeFiles/ALL_BUILD */,
+			);
+			dependencies = (
+				33E7FEB7A45C4C4B8510A18D /* PBXTargetDependency */,
+				3403D87E8DD54856B913E308 /* PBXTargetDependency */,
+			);
+			name = ALL_BUILD;
+			productName = ALL_BUILD;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		178C25C8F27948FE85AD973E /* RayMarching.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6B72BDD3642D4226AF388086 /* RayMarching.cpp */; };
+		2CFE858A53C340069A471634 /* glad.c in Sources */ = {isa = PBXBuildFile; fileRef = 6639B0780A694D718C7C0EFA /* glad.c */; };
+		2ED3F25E33BB4CB0B459099B /* stb_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6721B2A993E047CD8C50B9BB /* stb_image.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2EA1DA79E7D049CBA1401FD6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9E033B6EC975439793600579 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4268FF9D686D1FCAF256854F;
+			remoteInfo = ZERO_CHECK;
+		};
+		4C1DACD874114CC0AFAD3FE5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9E033B6EC975439793600579 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4268FF9D686D1FCAF256854F;
+			remoteInfo = ZERO_CHECK;
+		};
+		DE689AE2E0804CFE817C8C99 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9E033B6EC975439793600579 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 64B875B11DB21E790232F948;
+			remoteInfo = RayMarching;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		579C454AE8CE4F51B98D42EC /* Shader.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; path = Shader.h; sourceTree = SOURCE_ROOT; };
+		6639B0780A694D718C7C0EFA /* glad.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; path = glad.c; sourceTree = SOURCE_ROOT; };
+		6721B2A993E047CD8C50B9BB /* stb_image.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = stb_image.cpp; path = stb_image/stb_image.cpp; sourceTree = SOURCE_ROOT; };
+		6B72BDD3642D4226AF388086 /* RayMarching.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = RayMarching.cpp; sourceTree = SOURCE_ROOT; };
+		76EC8C0B988B49FE8357AF70 /* CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		97181EAC2DF26F5700634B00 /* BufferA.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = BufferA.fs; sourceTree = "<group>"; };
+		97181EAD2DF26F5700634B00 /* BufferB.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = BufferB.fs; sourceTree = "<group>"; };
+		97181EAE2DF26F5700634B00 /* BufferC.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = BufferC.fs; sourceTree = "<group>"; };
+		97181EAF2DF26F5700634B00 /* BufferD.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = BufferD.fs; sourceTree = "<group>"; };
+		97181EB02DF26F5700634B00 /* common.incl */ = {isa = PBXFileReference; lastKnownFileType = text; path = common.incl; sourceTree = "<group>"; };
+		97181EB12DF26F5700634B00 /* Image.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Image.fs; sourceTree = "<group>"; };
+		97181EB22DF26F5700634B00 /* Image.fs.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Image.fs.frag; sourceTree = "<group>"; };
+		97181EB32DF26F5700634B00 /* TextureViewer.fs.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = TextureViewer.fs.frag; sourceTree = "<group>"; };
+		97181EB42DF26F5700634B00 /* TextureViewer.vs.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = TextureViewer.vs.vert; sourceTree = "<group>"; };
+		97181EB52DF26F5700634B00 /* VertexShader.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = VertexShader.vs; sourceTree = "<group>"; };
+		9CEAA43BDE0A461085D694EC /* CoreVideo.framework */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk/System/Library/Frameworks/CoreVideo.framework; sourceTree = "<absolute>"; };
+		A2025BBB31554A7FA81C3BC2 /* Cocoa.framework */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		AA74E90420734C6D830FAA5B /* OpenGL.framework */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk/System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
+		BA09ABC6A5854D9FA10D3DBA /* IOKit.framework */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk/System/Library/Frameworks/IOKit.framework; sourceTree = "<absolute>"; };
+		E9148083E995454481CE5CFB /* CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		F477B23D89B94DE0B179D02F /* RayMarching */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = RayMarching; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8C1F9CBCC50447D69CBA23E6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0977E67CF90E4347B7EA4F1C = {
+			isa = PBXGroup;
+			children = (
+				1951C800BCC04A819A5F599A /* RayMarching */,
+				99889157E1CC4019B9E7C65F /* ALL_BUILD */,
+				5CAD50770D8A45DF89C1C1B9 /* Products */,
+				CB642D7BD6364F2C80D46121 /* Frameworks */,
+				B509E354FD164A719E8EA854 /* Resources */,
+			);
+			sourceTree = "<group>";
+		};
+		1951C800BCC04A819A5F599A /* RayMarching */ = {
+			isa = PBXGroup;
+			children = (
+				97181EB62DF26F5700634B00 /* Shaders */,
+				7EA3D0A564594D909E7C35C0 /* Source Files */,
+				4683865851434A088C8163A1 /* Header Files */,
+				76EC8C0B988B49FE8357AF70 /* CMakeLists.txt */,
+			);
+			name = RayMarching;
+			sourceTree = "<group>";
+		};
+		4683865851434A088C8163A1 /* Header Files */ = {
+			isa = PBXGroup;
+			children = (
+				579C454AE8CE4F51B98D42EC /* Shader.h */,
+			);
+			name = "Header Files";
+			sourceTree = "<group>";
+		};
+		5CAD50770D8A45DF89C1C1B9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F477B23D89B94DE0B179D02F /* RayMarching */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		7EA3D0A564594D909E7C35C0 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				6B72BDD3642D4226AF388086 /* RayMarching.cpp */,
+				6639B0780A694D718C7C0EFA /* glad.c */,
+				6721B2A993E047CD8C50B9BB /* stb_image.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		97181EB62DF26F5700634B00 /* Shaders */ = {
+			isa = PBXGroup;
+			children = (
+				97181EAC2DF26F5700634B00 /* BufferA.fs */,
+				97181EAD2DF26F5700634B00 /* BufferB.fs */,
+				97181EAE2DF26F5700634B00 /* BufferC.fs */,
+				97181EAF2DF26F5700634B00 /* BufferD.fs */,
+				97181EB02DF26F5700634B00 /* common.incl */,
+				97181EB12DF26F5700634B00 /* Image.fs */,
+				97181EB22DF26F5700634B00 /* Image.fs.frag */,
+				97181EB32DF26F5700634B00 /* TextureViewer.fs.frag */,
+				97181EB42DF26F5700634B00 /* TextureViewer.vs.vert */,
+				97181EB52DF26F5700634B00 /* VertexShader.vs */,
+			);
+			path = Shaders;
+			sourceTree = "<group>";
+		};
+		99889157E1CC4019B9E7C65F /* ALL_BUILD */ = {
+			isa = PBXGroup;
+			children = (
+				B6944A6FC32048E7BBCFDE38 /* CMake Rules */,
+				E9148083E995454481CE5CFB /* CMakeLists.txt */,
+			);
+			name = ALL_BUILD;
+			sourceTree = "<group>";
+		};
+		B509E354FD164A719E8EA854 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		B6944A6FC32048E7BBCFDE38 /* CMake Rules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "CMake Rules";
+			sourceTree = "<group>";
+		};
+		CB642D7BD6364F2C80D46121 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				AA74E90420734C6D830FAA5B /* OpenGL.framework */,
+				A2025BBB31554A7FA81C3BC2 /* Cocoa.framework */,
+				BA09ABC6A5854D9FA10D3DBA /* IOKit.framework */,
+				9CEAA43BDE0A461085D694EC /* CoreVideo.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		64B875B11DB21E790232F948 /* RayMarching */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5197EB94FC9645AEAE3F0FC2 /* Build configuration list for PBXNativeTarget "RayMarching" */;
+			buildPhases = (
+				7938987C6A454DAF8FA0BF21 /* Sources */,
+				8C1F9CBCC50447D69CBA23E6 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3F673028E6464CD699FB3580 /* PBXTargetDependency */,
+			);
+			name = RayMarching;
+			productName = RayMarching;
+			productReference = F477B23D89B94DE0B179D02F /* RayMarching */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9E033B6EC975439793600579 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1630;
+			};
+			buildConfigurationList = B949986D3B774DEE967286B9 /* Build configuration list for PBXProject "RayMarching" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 0977E67CF90E4347B7EA4F1C;
+			projectDirPath = "/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros";
+			projectRoot = "";
+			targets = (
+				CD2D336B00E732D5EEC43A8F /* ALL_BUILD */,
+				64B875B11DB21E790232F948 /* RayMarching */,
+				4268FF9D686D1FCAF256854F /* ZERO_CHECK */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		B93A90F07D4200851EA98DF1 /* Generate CMakeFiles/ALL_BUILD */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate CMakeFiles/ALL_BUILD";
+			outputPaths = (
+				"/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode/CMakeFiles/ALL_BUILD",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nif test \"$CONFIGURATION\" = \"Debug\"; then :\n  cd /Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode\n  echo Build\\ all\\ projects\nfi\nif test \"$CONFIGURATION\" = \"Release\"; then :\n  cd /Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode\n  echo Build\\ all\\ projects\nfi\nif test \"$CONFIGURATION\" = \"MinSizeRel\"; then :\n  cd /Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode\n  echo Build\\ all\\ projects\nfi\nif test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :\n  cd /Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode\n  echo Build\\ all\\ projects\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		C06970CA42ADAFDC55BAE344 /* Generate CMakeFiles/ZERO_CHECK */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate CMakeFiles/ZERO_CHECK";
+			outputPaths = (
+				"/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode/CMakeFiles/ZERO_CHECK",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nif test \"$CONFIGURATION\" = \"Debug\"; then :\n  cd /Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode\n  make -f /Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode/CMakeScripts/ReRunCMake.make\nfi\nif test \"$CONFIGURATION\" = \"Release\"; then :\n  cd /Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode\n  make -f /Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode/CMakeScripts/ReRunCMake.make\nfi\nif test \"$CONFIGURATION\" = \"MinSizeRel\"; then :\n  cd /Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode\n  make -f /Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode/CMakeScripts/ReRunCMake.make\nfi\nif test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :\n  cd /Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode\n  make -f /Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode/CMakeScripts/ReRunCMake.make\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		7938987C6A454DAF8FA0BF21 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				178C25C8F27948FE85AD973E /* RayMarching.cpp in Sources */,
+				2CFE858A53C340069A471634 /* glad.c in Sources */,
+				2ED3F25E33BB4CB0B459099B /* stb_image.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		33E7FEB7A45C4C4B8510A18D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4268FF9D686D1FCAF256854F /* ZERO_CHECK */;
+			targetProxy = 4C1DACD874114CC0AFAD3FE5 /* PBXContainerItemProxy */;
+		};
+		3403D87E8DD54856B913E308 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 64B875B11DB21E790232F948 /* RayMarching */;
+			targetProxy = DE689AE2E0804CFE817C8C99 /* PBXContainerItemProxy */;
+		};
+		3F673028E6464CD699FB3580 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4268FF9D686D1FCAF256854F /* ZERO_CHECK */;
+			targetProxy = 2EA1DA79E7D049CBA1401FD6 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		17BD7F045BE34DD782552BCF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode/Release";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk/System/Library/Frameworks,
+					"$(inherited)",
+				);
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					"/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/includes",
+					"$(inherited)",
+				);
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					/opt/homebrew/lib,
+					"$(inherited)",
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"$(inherited)",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-DNDEBUG",
+					"'-std=gnu++17'",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					"-framework",
+					OpenGL,
+					"-framework",
+					OpenGL,
+					/opt/homebrew/lib/libglfw.3.4.dylib,
+					"-framework",
+					Cocoa,
+					"-framework",
+					IOKit,
+					"-framework",
+					CoreVideo,
+					"$(inherited)",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = RayMarching;
+				SECTORDER_FLAGS = "";
+				SYSTEM_HEADER_SEARCH_PATHS = (
+					/opt/homebrew/include,
+					"$(inherited)",
+				);
+				TARGET_TEMP_DIR = "/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode/build/RayMarching.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = Release;
+		};
+		2AE4019415F044B3A3F20E1E /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = " $(inherited)";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = RelWithDebInfo;
+		};
+		341BDCBCBF404454AA32F14D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				SDKROOT = "";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = "/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode/build";
+			};
+			name = Release;
+		};
+		46508A74C81240EBAC2DD940 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode/RelWithDebInfo";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk/System/Library/Frameworks,
+					"$(inherited)",
+				);
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					"/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/includes",
+					"$(inherited)",
+				);
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					/opt/homebrew/lib,
+					"$(inherited)",
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"$(inherited)",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-DNDEBUG",
+					"'-std=gnu++17'",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					"-framework",
+					OpenGL,
+					"-framework",
+					OpenGL,
+					/opt/homebrew/lib/libglfw.3.4.dylib,
+					"-framework",
+					Cocoa,
+					"-framework",
+					IOKit,
+					"-framework",
+					CoreVideo,
+					"$(inherited)",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = RayMarching;
+				SECTORDER_FLAGS = "";
+				SYSTEM_HEADER_SEARCH_PATHS = (
+					/opt/homebrew/include,
+					"$(inherited)",
+				);
+				TARGET_TEMP_DIR = "/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode/build/RayMarching.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = RelWithDebInfo;
+		};
+		4BF8C26C2A854D0BB1C1F564 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				SDKROOT = "";
+				SYMROOT = "/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode/build";
+			};
+			name = Debug;
+		};
+		6E525532356A47AA8DD86B80 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = " $(inherited)";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = MinSizeRel;
+		};
+		73232276F40F4CCF8F8C4B81 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = " $(inherited)";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = Release;
+		};
+		8D8653F6E63C4B06B5D37EBC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode/Debug";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk/System/Library/Frameworks,
+					"$(inherited)",
+				);
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					"/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/includes",
+					"$(inherited)",
+				);
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					/opt/homebrew/lib,
+					"$(inherited)",
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CFLAGS = "    $(inherited)";
+				OTHER_CPLUSPLUSFLAGS = "   '-std=gnu++17' ";
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					"-framework",
+					OpenGL,
+					"-framework",
+					OpenGL,
+					/opt/homebrew/lib/libglfw.3.4.dylib,
+					"-framework",
+					Cocoa,
+					"-framework",
+					IOKit,
+					"-framework",
+					CoreVideo,
+					"$(inherited)",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = RayMarching;
+				SECTORDER_FLAGS = "";
+				SYSTEM_HEADER_SEARCH_PATHS = (
+					/opt/homebrew/include,
+					"$(inherited)",
+				);
+				TARGET_TEMP_DIR = "/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode/build/RayMarching.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = Debug;
+		};
+		955DA7886CE74861AEE22C54 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				SDKROOT = "";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = "/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode/build";
+			};
+			name = RelWithDebInfo;
+		};
+		B2E5E768DFFD4C79A180A3F5 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = " $(inherited)";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = MinSizeRel;
+		};
+		B85EEB157F5A4C5FA1FF7263 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode/MinSizeRel";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk/System/Library/Frameworks,
+					"$(inherited)",
+				);
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					"/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/includes",
+					"$(inherited)",
+				);
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					/opt/homebrew/lib,
+					"$(inherited)",
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"$(inherited)",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-DNDEBUG",
+					"'-std=gnu++17'",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					"-framework",
+					OpenGL,
+					"-framework",
+					OpenGL,
+					/opt/homebrew/lib/libglfw.3.4.dylib,
+					"-framework",
+					Cocoa,
+					"-framework",
+					IOKit,
+					"-framework",
+					CoreVideo,
+					"$(inherited)",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = RayMarching;
+				SECTORDER_FLAGS = "";
+				SYSTEM_HEADER_SEARCH_PATHS = (
+					/opt/homebrew/include,
+					"$(inherited)",
+				);
+				TARGET_TEMP_DIR = "/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode/build/RayMarching.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = MinSizeRel;
+		};
+		BC75189D1BA540D2B257B746 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = " $(inherited)";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = Debug;
+		};
+		D455E171F855480DB4202EA2 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = " $(inherited)";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = RelWithDebInfo;
+		};
+		DBDC3CCEE4D943DF889A7225 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = " $(inherited)";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = Release;
+		};
+		F2900128F53149E9ADD8C8F2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = " $(inherited)";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = Debug;
+		};
+		F9B9D8EFC9DF4DC39E380522 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				SDKROOT = "";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = "/Users/vaugusto/Developer/ach2117-compgrafica/rayMarching_cor_filtros/proj_XCode/build";
+			};
+			name = MinSizeRel;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5197EB94FC9645AEAE3F0FC2 /* Build configuration list for PBXNativeTarget "RayMarching" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8D8653F6E63C4B06B5D37EBC /* Debug */,
+				17BD7F045BE34DD782552BCF /* Release */,
+				B85EEB157F5A4C5FA1FF7263 /* MinSizeRel */,
+				46508A74C81240EBAC2DD940 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B949986D3B774DEE967286B9 /* Build configuration list for PBXProject "RayMarching" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4BF8C26C2A854D0BB1C1F564 /* Debug */,
+				341BDCBCBF404454AA32F14D /* Release */,
+				F9B9D8EFC9DF4DC39E380522 /* MinSizeRel */,
+				955DA7886CE74861AEE22C54 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D61A30D0B0A24AC0A566C738 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BC75189D1BA540D2B257B746 /* Debug */,
+				DBDC3CCEE4D943DF889A7225 /* Release */,
+				B2E5E768DFFD4C79A180A3F5 /* MinSizeRel */,
+				D455E171F855480DB4202EA2 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F1F9EB9B7AF04829AAFD0474 /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F2900128F53149E9ADD8C8F2 /* Debug */,
+				73232276F40F4CCF8F8C4B81 /* Release */,
+				6E525532356A47AA8DD86B80 /* MinSizeRel */,
+				2AE4019415F044B3A3F20E1E /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 9E033B6EC975439793600579 /* Project object */;
+}
