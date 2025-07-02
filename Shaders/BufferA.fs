@@ -14,7 +14,21 @@ uniform int iFrame;
 #define PI 3.1459
 #define TAU PI*2.0
 
+#define CYCLE_DURATION 30.0 
+#define SUNRISE_TIME 0.25    
+#define SUNSET_TIME 0.75   
+
+const vec3 COLOR_NIGHT = vec3(0.05, 0.05, 0.15);
+const vec3 COLOR_SUNRISE = vec3(0.8, 0.4, 0.2);
+const vec3 COLOR_DAY = vec3(0.4, 0.7, 1.0);
+const vec3 COLOR_SUNSET = vec3(0.9, 0.3, 0.1);
+
+const vec3 CLOUD_COLOR_DAY = vec3(1.0, 1.0, 1.0);
+const vec3 CLOUD_COLOR_SUNSET = vec3(1.0, 0.8, 0.6);
+const vec3 STAR_COLOR = vec3(0.8, 0.9, 1.0);
+
 const vec3 COLOR_BACKGROUND = vec3(0.1, 0.01, 0.05);
+
 const vec3 CaixaAguaPosition = vec3(5.0, 1.0, -0.2); 
 const float CaixaAguaHeight = 6.5;
 const float CaixaAguaRadius = 0.4;
@@ -30,11 +44,156 @@ struct Surface {
     vec3 emission;
 };
 
+float getTimeOfDay() {
+    return mod(iTime / CYCLE_DURATION, 1.0);
+}
+
+vec3 getSunPosition(float timeOfDay) {
+    float angle = timeOfDay * TAU - PI/2.0; 
+    float height = sin(angle) * 10.0; 
+    float distance = cos(angle) * 15.0; 
+    return vec3(distance, max(height, -2.0), 0.0);
+}
+
 float sdSphere(vec3 p, float r) {
     return length(p) - r;
 }
-float hash(float n) {
-    return fract(sin(n) * 43758.5453123);
+float hash(vec2 p) {
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
+
+float noise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    
+    return mix(mix(hash(i + vec2(0.0, 0.0)),
+                   hash(i + vec2(1.0, 0.0)), u.x),
+               mix(hash(i + vec2(0.0, 1.0)),
+                   hash(i + vec2(1.0, 1.0)), u.x), u.y);
+}
+
+float cloudNoise(vec2 p) {
+    float f = 0.0;
+    f += 0.5000 * noise(p); p *= 2.0;
+    f += 0.2500 * noise(p); p *= 2.0;
+    f += 0.1250 * noise(p); p *= 2.0;
+    f += 0.0625 * noise(p);
+    return f;
+}
+
+
+float getClouds(vec3 rayDir, float timeOfDay) {
+
+    if (rayDir.y <= 0.1) return 0.0;
+    
+    vec2 skyUV = vec2(atan(rayDir.z, rayDir.x) / TAU + 0.5,
+                      (rayDir.y - 0.1) / 0.9);
+    
+    skyUV.x += iTime * 0.02;
+    skyUV *= 3.0; 
+    
+    float cloudDensity = cloudNoise(skyUV);
+    
+    cloudDensity = smoothstep(0.4, 0.8, cloudDensity);
+    
+    if (timeOfDay < SUNRISE_TIME || timeOfDay > SUNSET_TIME) {
+        cloudDensity *= 0.3;
+    }
+    
+    return cloudDensity;
+}
+
+float getStars(vec3 rayDir, float timeOfDay) {
+
+    float starVisibility = 0.0;
+    if (timeOfDay < SUNRISE_TIME) {
+        starVisibility = 1.0 - timeOfDay / SUNRISE_TIME;
+    } else if (timeOfDay > SUNSET_TIME) {
+        starVisibility = (timeOfDay - SUNSET_TIME) / (1.0 - SUNSET_TIME);
+    }
+    
+    if (starVisibility <= 0.0) return 0.0;
+    
+    vec2 starUV = vec2(atan(rayDir.z, rayDir.x) / TAU + 0.5,
+                       acos(rayDir.y) / PI);
+    
+    starUV *= iResolution.x * 0.05;
+    
+    vec2 gridId = floor(starUV);
+    vec2 gridUV = fract(starUV);
+    
+    float starField = hash(gridId);
+    
+    starField = step(0.98, starField); 
+    
+    vec2 starPos = vec2(hash(gridId + vec2(1.0, 0.0)), hash(gridId + vec2(0.0, 1.0)));
+    float dist = length(gridUV - starPos);
+    
+    float starShape = 1.0 - smoothstep(0.0, 0.05, dist);
+    starField *= starShape;
+    
+    float twinkle = 0.7 + 0.3 * sin(iTime * 2.0 + hash(gridId) * 100.0);
+    starField *= twinkle;
+    
+    return starField * starVisibility;
+}
+
+vec3 getSkyColor(float timeOfDay, vec3 rayDir) {
+    vec3 sunPos = getSunPosition(timeOfDay);
+    vec3 sunDir = normalize(sunPos);
+    
+    float sunDot = max(dot(rayDir, sunDir), 0.0);
+    
+    vec3 skyColor;
+    
+    if (timeOfDay < SUNRISE_TIME) {
+        float t = timeOfDay / SUNRISE_TIME;
+        skyColor = mix(COLOR_NIGHT, COLOR_SUNRISE, smoothstep(0.8, 1.0, t));
+    } else if (timeOfDay < 0.5) {
+        float t = (timeOfDay - SUNRISE_TIME) / (0.5 - SUNRISE_TIME);
+        skyColor = mix(COLOR_SUNRISE, COLOR_DAY, t);
+    } else if (timeOfDay < SUNSET_TIME) {
+        float t = (timeOfDay - 0.5) / (SUNSET_TIME - 0.5);
+        skyColor = mix(COLOR_DAY, COLOR_SUNSET, t);
+    } else {
+        float t = (timeOfDay - SUNSET_TIME) / (1.0 - SUNSET_TIME);
+        skyColor = mix(COLOR_SUNSET, COLOR_NIGHT, smoothstep(0.0, 0.8, t));
+    }
+    
+    float sunGlow = pow(sunDot, 8.0) * 0.5;
+    if (sunPos.y > 0.0) { 
+        skyColor += vec3(1.0, 0.9, 0.7) * sunGlow;
+    }
+
+    float starIntensity = getStars(rayDir, timeOfDay);
+    skyColor += STAR_COLOR * starIntensity * 0.8;
+    
+    float cloudDensity = getClouds(rayDir, timeOfDay);
+    if (cloudDensity > 0.0) {
+        vec3 cloudColor;
+        if (timeOfDay < SUNRISE_TIME || timeOfDay > SUNSET_TIME) {
+            cloudColor = mix(skyColor, vec3(0.2, 0.2, 0.3), 0.7);
+        } else if (timeOfDay < 0.4 || timeOfDay > 0.6) {
+            cloudColor = CLOUD_COLOR_SUNSET;
+        } else {
+            cloudColor = CLOUD_COLOR_DAY;
+        }
+        
+        skyColor = mix(skyColor, cloudColor, cloudDensity * 0.8);
+    }
+    
+    
+    return skyColor;
+}
+
+float getLightIntensity(float timeOfDay) {
+    if (timeOfDay < SUNRISE_TIME || timeOfDay > SUNSET_TIME) {
+        return 0.1;
+    } else {
+        float dayProgress = (timeOfDay - SUNRISE_TIME) / (SUNSET_TIME - SUNRISE_TIME);
+        return 0.1 + 0.9 * sin(dayProgress * PI); 
+    }
 }
 
 mat4 rotX (in float angle)
@@ -314,7 +473,7 @@ Surface getSceneDist(vec3 p)
             
             Surface janelaAtual;
             
-            if (iTime >= 2.0 && iTime <= 5.0) {
+            if (iTime >= 20.0 && iTime <= 21.5) {
   
                 if (
                     // F
@@ -354,7 +513,7 @@ Surface getSceneDist(vec3 p)
                 }
             }
 
-            else if (iTime > 5.0 && iTime <= 7.0) { 
+            else if (iTime > 21.5 && iTime <= 23.0) { 
                 
                 if (
 
@@ -400,7 +559,7 @@ Surface getSceneDist(vec3 p)
 
             }
 
-            else if (iTime > 7.0 && iTime <= 9.0) { 
+            else if (iTime > 23.0 && iTime <= 24.5) { 
                 
                 if (
 
@@ -454,7 +613,7 @@ Surface getSceneDist(vec3 p)
 
             }
 
-            else if (iTime >  9.0 && iTime <= 11.0) { 
+            else if (iTime >  24.5 && iTime <= 26.0) { 
 
                 if (
 
@@ -504,7 +663,7 @@ Surface getSceneDist(vec3 p)
 
             }
 
-            else if (iTime >  11.0) { 
+            else if (iTime >  26.0 && iTime <= 29.0) { 
 
                 if (
 
@@ -564,6 +723,12 @@ Surface getSceneDist(vec3 p)
                 } else {
                     janelaAtual = materialJanelaApagada;
                 }
+
+            }
+
+            else if (iTime >  29.0) { 
+
+                janelaAtual = materialJanelaAcesa;
 
             }
 
@@ -641,8 +806,7 @@ Surface getSceneDist(vec3 p)
     vec3 caminho2_ida = vec3(8.0, 0.25, 0.0);
     vec3 caminho2_volta   = vec3(8.0, 0.25, 8.0);
 
-    // --- Pessoa 0: Roupa vermelha, indo no caminho 1 ---
-    float velocidade0 = 1.0;
+    float velocidade0 = 5.0;
     vec3 direcaoDoCaminho0 = normalize(caminho1_volta - caminho1_ida);
     float progressoNoCaminho0 = mod(iTime * velocidade0, distance(caminho1_ida, caminho1_volta));
     vec3 posicaoBase0 = caminho1_ida + direcaoDoCaminho0 * progressoNoCaminho0;
@@ -651,8 +815,7 @@ Surface getSceneDist(vec3 p)
     Surface Cabeca0 = Surface(vec3(0.9, 0.7, 0.5), sdSphere(p - (posicaoBase0 + vec3(0.0, 0.4/2.0 + 0.15, 0.0)), 0.15), 0.1, vec3(0.0));
     Surface Pessoa0 = unionS(Tronco0, Cabeca0);
 
-    // --- Pessoa 2: Roupa verde, indo no caminho 1 ---
-    float velocidade2 = 1.2;
+    float velocidade2 = 5.2;
     vec3 direcaoDoCaminho2 = normalize(caminho1_volta - caminho1_ida);
     float progressoNoCaminho2 = mod(iTime * velocidade2 + 2.0, distance(caminho1_ida, caminho1_volta)); // Offset
     vec3 posicaoBase2 = caminho1_ida + direcaoDoCaminho2 * progressoNoCaminho2;
@@ -661,8 +824,7 @@ Surface getSceneDist(vec3 p)
     Surface Cabeca2 = Surface(vec3(0.8, 0.6, 0.4), sdSphere(p - (posicaoBase2 + vec3(0.0, 0.4/2.0 + 0.15, 0.0)), 0.15), 0.1, vec3(0.0));
     Surface Pessoa2 = unionS(Tronco2, Cabeca2);
 
-    // --- Pessoa 3: Roupa roxa, indo no caminho 2 ---
-    float velocidade3 = 1.0;
+    float velocidade3 = 5.0;
     vec3 direcaoDoCaminho3 = normalize(caminho2_volta - caminho2_ida);
     float progressoNoCaminho3 = mod(iTime * velocidade3, distance(caminho2_ida, caminho2_volta));
     vec3 posicaoBase3 = caminho2_ida + direcaoDoCaminho3 * progressoNoCaminho3;
@@ -671,8 +833,7 @@ Surface getSceneDist(vec3 p)
     Surface Cabeca3 = Surface(vec3(0.4, 0.2, 0.1), sdSphere(p - (posicaoBase3 + vec3(0.0, 0.4/2.0 + 0.15, 0.0)), 0.15), 0.1, vec3(0.0));
     Surface Pessoa3 = unionS(Tronco3, Cabeca3);
 
-    // --- Pessoa 4: Roupa amarela, voltando no caminho 2 ---
-    float velocidade4 = 1.1;
+    float velocidade4 = 5.1;
     vec3 direcaoDoCaminho4 = normalize(caminho2_ida - caminho2_volta);
     float progressoNoCaminho4 = mod(iTime * velocidade4, distance(caminho2_ida, caminho2_volta));
     vec3 posicaoBase4 = caminho2_volta + direcaoDoCaminho4 * progressoNoCaminho4;
@@ -681,8 +842,7 @@ Surface getSceneDist(vec3 p)
     Surface Cabeca4 = Surface(vec3(0.9, 0.7, 0.5), sdSphere(p - (posicaoBase4 + vec3(0.0, 0.4/2.0 + 0.15, 0.0)), 0.15), 0.1, vec3(0.0));
     Surface Pessoa4 = unionS(Tronco4, Cabeca4);
 
-    // --- Pessoa 5: Roupa vermelha, indo no caminho 1 ---
-    float velocidade5 = 1.0;
+    float velocidade5 = 5.0;
     vec3 direcaoDoCaminho5 = normalize(caminho0_volta - caminho0_ida);
     float progressoNoCaminho5 = mod(iTime * velocidade5, distance(caminho0_ida, caminho0_volta));
     vec3 posicaoBase5 = caminho0_ida + direcaoDoCaminho5 * progressoNoCaminho5;
@@ -691,8 +851,7 @@ Surface getSceneDist(vec3 p)
     Surface Cabeca5 = Surface(vec3(0.9, 0.7, 0.5), sdSphere(p - (posicaoBase5 + vec3(0.0, 0.4/2.0 + 0.15, 0.0)), 0.15), 0.1, vec3(0.0));
     Surface Pessoa5 = unionS(Tronco5, Cabeca5);
 
-    // --- Pessoa 5: Roupa vermelha, indo no caminho 1 ---
-    float velocidade6 = 0.6;
+    float velocidade6 = 5.6;
     vec3 direcaoDoCaminho6 = normalize(caminho0_ida - caminho0_volta);
     float progressoNoCaminho6 = mod(iTime * velocidade6, distance(caminho0_volta, caminho0_ida));
     vec3 posicaoBase6 = caminho0_volta + direcaoDoCaminho6 * progressoNoCaminho6;
@@ -743,24 +902,36 @@ vec3 estimateNormal(vec3 p)
 
 vec3 getLight(vec3 p,Surface s,vec3 CamPos)
 {
-    vec3 lp = vec3 (1.0,7.0,2.0);
-    vec3 lColor= vec3(1.0);
-
-    vec3 ld = normalize(lp-p);
-    vec3 n = estimateNormal(p);
-    float r =clamp(dot(ld,n),0.0,1.0);
-    float ka =0.3;
-    float kd=0.5;
-    float ks =0.20;
-    vec3 eye = normalize(CamPos - p);
-    vec3 R = reflect(-ld,n);
-    float phi = clamp(dot(R,eye),0.0,1.0);
-    float shininess = mix(8.0, 1024.0, s.smoothness);
-    vec3 col = s.emission + s.color*ka + s.color*r*kd + lColor*ks*pow(phi, shininess);
+    float timeOfDay = getTimeOfDay();
+    vec3 sunPos = getSunPosition(timeOfDay);
+    float lightIntensity = getLightIntensity(timeOfDay);
     
-    Surface ss =rayMarching(p + n * minDist * 2.0, ld);
-    if(ss.d<length(lp-p))
-        col*=0.2;
+    vec3 lColor;
+    if (timeOfDay < SUNRISE_TIME || timeOfDay > SUNSET_TIME) {
+        lColor = vec3(0.3, 0.3, 0.6);
+    } else if (timeOfDay < 0.4 || timeOfDay > 0.6) {
+        lColor = vec3(1.0, 0.7, 0.4); 
+    } else {
+        lColor = vec3(1.0, 1.0, 0.9); 
+    }
+    
+    vec3 ld = normalize(sunPos - p);
+    vec3 n = estimateNormal(p);
+    float r = clamp(dot(ld,n), 0.0, 1.0);
+    
+    float ka = 0.2 + 0.1 * lightIntensity; 
+    float kd = 0.5 * lightIntensity;
+    float ks = 0.20 * lightIntensity;
+    
+    vec3 eye = normalize(p - CamPos);
+    vec3 R = normalize(reflect(n, ld));
+    float phi = clamp(dot(R, eye), 0.0, 1.0);
+    
+    vec3 col = s.color * ka + s.color * r * kd + lColor * ks * pow(phi, 10.0);
+    
+    Surface ss = rayMarching(p + 100.0 * minDist * n, ld);
+    if(ss.d < length(p - sunPos))
+        col *= 0.2;
 
     return col;
 }
@@ -785,8 +956,8 @@ void main ()
     vec3 rd = M * normalize(vec3(uv,1.0));
 
     Surface sd = rayMarching(Cam,rd);
-    vec3 col = COLOR_BACKGROUND;
-    
+    vec3 col;
+
     if (sd.d < maxDist)
     {
         vec3 p = Cam + sd.d * rd;
@@ -796,9 +967,15 @@ void main ()
             finalSurface = getCaixaAguaMaterial(p, finalSurface);
         }
 
-        col = getLight(p, finalSurface, Cam);
+        col = getLight(p, finalSurface, Cam) + finalSurface.emission;
+    }
+    else 
+    {
+        float timeOfDay = getTimeOfDay();
+        col = getSkyColor(timeOfDay, rd);
     }
     
+    // Aplica a correção de gamma no final
     col = pow( col, vec3(0.4545) );
     C = vec4(col,1.0);
 }
