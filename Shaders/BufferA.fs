@@ -14,31 +14,10 @@ uniform int iFrame;
 #define PI 3.1459
 #define TAU PI*2.0
 
-// Day/Night cycle parameters
-#define CYCLE_DURATION 30.0  // 30 seconds for full day cycle
-#define SUNRISE_TIME 0.25    // 25% through cycle
-#define SUNSET_TIME 0.75     // 75% through cycle
-
-// Sky colors for different times of day
-const vec3 COLOR_NIGHT = vec3(0.05, 0.05, 0.15);
-const vec3 COLOR_SUNRISE = vec3(0.8, 0.4, 0.2);
-const vec3 COLOR_DAY = vec3(0.4, 0.7, 1.0);
-const vec3 COLOR_SUNSET = vec3(0.9, 0.3, 0.1);
-
-// Cloud and star parameters
-const vec3 CLOUD_COLOR_DAY = vec3(1.0, 1.0, 1.0);
-const vec3 CLOUD_COLOR_SUNSET = vec3(1.0, 0.8, 0.6);
-const vec3 STAR_COLOR = vec3(0.8, 0.9, 1.0);
-
 const vec3 COLOR_BACKGROUND = vec3(0.1, 0.01, 0.05);
-
-/*  Install  Istructions
-
-sudo apt-get install g++ cmake git
- sudo apt-get install libsoil-dev libglm-dev libassimp-dev libglew-dev libglfw3-dev libxinerama-dev libxcursor-dev
-libxi-dev libfreetype-dev libgl1-mesa-dev xorg-dev
-
-git clone https://github.com/JoeyDeVries/LearnOpenGL.git*/
+const vec3 CaixaAguaPosition = vec3(5.0, 1.0, -0.2); 
+const float CaixaAguaHeight = 6.5;
+const float CaixaAguaRadius = 0.4;
 
 float minDist = 0.01;
 float maxDist = 100.;
@@ -47,246 +26,99 @@ int maxIt = 100;
 struct Surface {
     vec3 color;
     float d;
+    float smoothness;
+    vec3 emission;
 };
 
-// Function to get current time of day (0.0 = midnight, 0.5 = noon, 1.0 = midnight)
-float getTimeOfDay() {
-    return mod(iTime / CYCLE_DURATION, 1.0);
+float sdSphere(vec3 p, float r) {
+    return length(p) - r;
+}
+float hash(float n) {
+    return fract(sin(n) * 43758.5453123);
 }
 
-// Function to calculate sun position based on time of day
-vec3 getSunPosition(float timeOfDay) {
-    float angle = timeOfDay * TAU - PI/2.0; // Start at sunrise
-    float height = sin(angle) * 10.0; // Sun height
-    float distance = cos(angle) * 15.0; // Sun distance
-    return vec3(distance, max(height, -2.0), 0.0);
-}
-
-// Simple noise function for procedural generation
-float hash(vec2 p) {
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-}
-
-float noise(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    vec2 u = f * f * (3.0 - 2.0 * f);
-    
-    return mix(mix(hash(i + vec2(0.0, 0.0)),
-                   hash(i + vec2(1.0, 0.0)), u.x),
-               mix(hash(i + vec2(0.0, 1.0)),
-                   hash(i + vec2(1.0, 1.0)), u.x), u.y);
-}
-
-// Function to generate clouds
-float cloudNoise(vec2 p) {
-    float f = 0.0;
-    f += 0.5000 * noise(p); p *= 2.0;
-    f += 0.2500 * noise(p); p *= 2.0;
-    f += 0.1250 * noise(p); p *= 2.0;
-    f += 0.0625 * noise(p);
-    return f;
-}
-
-// Function to get cloud density at a given sky position
-float getClouds(vec3 rayDir, float timeOfDay) {
-    // Only render clouds if ray is pointing upward
-    if (rayDir.y <= 0.1) return 0.0;
-    
-    // Project ray onto sky sphere
-    vec2 skyUV = vec2(atan(rayDir.z, rayDir.x) / TAU + 0.5,
-                      (rayDir.y - 0.1) / 0.9);
-    
-    // Animate clouds moving across the sky
-    skyUV.x += iTime * 0.02; // Cloud movement speed
-    skyUV *= 3.0; // Cloud scale
-    
-    float cloudDensity = cloudNoise(skyUV);
-    
-    // Make clouds more defined
-    cloudDensity = smoothstep(0.4, 0.8, cloudDensity);
-    
-    // Reduce cloud density at night
-    if (timeOfDay < SUNRISE_TIME || timeOfDay > SUNSET_TIME) {
-        cloudDensity *= 0.3;
-    }
-    
-    return cloudDensity;
-}
-
-// Function to generate stars
-float getStars(vec3 rayDir, float timeOfDay) {
-    // Only show stars at night
-    float starVisibility = 0.0;
-    if (timeOfDay < SUNRISE_TIME) {
-        starVisibility = 1.0 - timeOfDay / SUNRISE_TIME;
-    } else if (timeOfDay > SUNSET_TIME) {
-        starVisibility = (timeOfDay - SUNSET_TIME) / (1.0 - SUNSET_TIME);
-    }
-    
-    if (starVisibility <= 0.0) return 0.0;
-    
-    // Project ray onto sky sphere for star positioning
-    vec2 starUV = vec2(atan(rayDir.z, rayDir.x) / TAU + 0.5,
-                       acos(rayDir.y) / PI);
-    
-    // Scale based on screen resolution for consistent star size
-    starUV *= iResolution.x * 0.05; // Adjust multiplier for star density
-    
-    // Get the grid cell
-    vec2 gridId = floor(starUV);
-    vec2 gridUV = fract(starUV);
-    
-    // Create star field using noise
-    float starField = hash(gridId);
-    
-    // Make stars more sparse and defined
-    starField = step(0.98, starField); // Higher threshold for fewer stars
-    
-    // Create sharp star points by checking distance to center of cell
-    vec2 starPos = vec2(hash(gridId + vec2(1.0, 0.0)), hash(gridId + vec2(0.0, 1.0)));
-    float dist = length(gridUV - starPos);
-    
-    // Make stars small and sharp
-    float starShape = 1.0 - smoothstep(0.0, 0.05, dist);
-    starField *= starShape;
-    
-    // Add twinkling effect
-    float twinkle = 0.7 + 0.3 * sin(iTime * 2.0 + hash(gridId) * 100.0);
-    starField *= twinkle;
-    
-    return starField * starVisibility;
-}
-
-// Function to get sky color based on time of day
-vec3 getSkyColor(float timeOfDay, vec3 rayDir) {
-    vec3 sunPos = getSunPosition(timeOfDay);
-    vec3 sunDir = normalize(sunPos);
-    
-    // Calculate sun dot product with ray direction
-    float sunDot = max(dot(rayDir, sunDir), 0.0);
-    
-    vec3 skyColor;
-    
-    if (timeOfDay < SUNRISE_TIME) {
-        // Night to sunrise
-        float t = timeOfDay / SUNRISE_TIME;
-        skyColor = mix(COLOR_NIGHT, COLOR_SUNRISE, smoothstep(0.8, 1.0, t));
-    } else if (timeOfDay < 0.5) {
-        // Sunrise to noon
-        float t = (timeOfDay - SUNRISE_TIME) / (0.5 - SUNRISE_TIME);
-        skyColor = mix(COLOR_SUNRISE, COLOR_DAY, t);
-    } else if (timeOfDay < SUNSET_TIME) {
-        // Noon to sunset
-        float t = (timeOfDay - 0.5) / (SUNSET_TIME - 0.5);
-        skyColor = mix(COLOR_DAY, COLOR_SUNSET, t);
-    } else {
-        // Sunset to night
-        float t = (timeOfDay - SUNSET_TIME) / (1.0 - SUNSET_TIME);
-        skyColor = mix(COLOR_SUNSET, COLOR_NIGHT, smoothstep(0.0, 0.8, t));
-    }
-    
-    // Add sun glow effect
-    float sunGlow = pow(sunDot, 8.0) * 0.5;
-    if (sunPos.y > 0.0) { // Only during day
-        skyColor += vec3(1.0, 0.9, 0.7) * sunGlow;
-    }
-    
-    // Add stars
-    float starIntensity = getStars(rayDir, timeOfDay);
-    skyColor += STAR_COLOR * starIntensity * 0.8;
-    
-    // Add clouds
-    float cloudDensity = getClouds(rayDir, timeOfDay);
-    if (cloudDensity > 0.0) {
-        vec3 cloudColor;
-        if (timeOfDay < SUNRISE_TIME || timeOfDay > SUNSET_TIME) {
-            // Night clouds - darker
-            cloudColor = mix(skyColor, vec3(0.2, 0.2, 0.3), 0.7);
-        } else if (timeOfDay < 0.4 || timeOfDay > 0.6) {
-            // Sunrise/sunset clouds - warm colors
-            cloudColor = CLOUD_COLOR_SUNSET;
-        } else {
-            // Day clouds - white
-            cloudColor = CLOUD_COLOR_DAY;
-        }
-        
-        skyColor = mix(skyColor, cloudColor, cloudDensity * 0.8);
-    }
-    
-    
-    return skyColor;
-}
-
-// Function to get light intensity based on time of day
-float getLightIntensity(float timeOfDay) {
-    if (timeOfDay < SUNRISE_TIME || timeOfDay > SUNSET_TIME) {
-        return 0.1; // Night lighting
-    } else {
-        float dayProgress = (timeOfDay - SUNRISE_TIME) / (SUNSET_TIME - SUNRISE_TIME);
-        return 0.1 + 0.9 * sin(dayProgress * PI); // Smooth day lighting curve
-    }
-}
-
-// Rotacionar em X
 mat4 rotX (in float angle)
 {
     float rad = radians (angle);
     float c = cos (rad);
     float s = sin (rad);
-
     mat4 mat = mat4 (vec4 (1.0, 0.0, 0.0, 0.0),
                      vec4 (0.0,   c,   s, 0.0),
                      vec4 (0.0,  -s,   c, 0.0),
                      vec4 (0.0, 0.0, 0.0, 1.0));
-
     return mat;
 }
 
-// Rotacionar em Y
 mat4 rotY (in float angle)
 {
     float rad = radians (angle);
     float c = cos (rad);
     float s = sin (rad);
-
     mat4 mat = mat4 (vec4 (  c, 0.0,  -s, 0.0),
                      vec4 (0.0, 1.0, 0.0, 0.0),
                      vec4 (  s, 0.0,   c, 0.0),
                      vec4 (0.0, 0.0, 0.0, 1.0));
-
     return mat;
 }
 
-// Rotacionar em Z
 mat4 rotZ (in float angle)
 {
     float rad = radians (angle);
     float c = cos (rad);
     float s = sin (rad);
-
     mat4 mat = mat4 (vec4 (  c,   s, 0.0, 0.0),
                      vec4 ( -s,   c, 0.0, 0.0),
                      vec4 (0.0, 0.0, 1.0, 0.0),
                      vec4 (0.0, 0.0, 0.0, 1.0));
-
     return mat;
 }
 
 vec3 opTransf (vec3 p, mat4 m)
 {
-    return vec4 (m * vec4 (p, 1.)).xyz;
+    return (m * vec4 (p, 1.)).xyz;
 }
 
-//caixa para os prédios
 float sdBox(vec3 p, vec3 b) {
     vec3 q = abs(p) - b;
     return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0);
 }
-//chão com grama
-float sdWavyGround(vec3 p) {
-    float height = 0.1 * sin(p.x * 0.5) * sin(p.z * 0.5);
-    return p.y - height;
+
+float sdCylinder( vec3 p, float h, float r )
+{
+  vec2 d = abs(vec2(length(p.xz),p.y)) - vec2(r,h/2.0);
+  return min(max(d.x,d.y),0.0) + length(max(d,0.0));
+}
+
+Surface getCaixaAguaMaterial(vec3 p, Surface s) {
+    
+    vec3 corDaBase = vec3(0.020, 0.325, 0.486); // Cor #05537c
+    vec3 corDoTopo = vec3(0.953, 0.522, 0.078); // Cor #f38514
+
+    float alturaDaBaseNoMundo = CaixaAguaPosition.y - (CaixaAguaHeight / 2.0);
+    float alturaRelativa = (p.y - alturaDaBaseNoMundo) / CaixaAguaHeight;
+
+    if (alturaRelativa > 0.8) {
+        s.color = corDoTopo;
+    } else {
+        s.color = corDaBase;
+    }
+
+    s.smoothness = 0.8;
+    
+    return s;
+}
+
+float sdWavyGround(vec3 p, vec2 center) {
+    
+
+    float flatRadius = 30.0; 
+    float hillRadius = 60.0;
+    float distFromCenter = distance(p.xz, center);
+    float blendFactor = smoothstep(flatRadius, hillRadius, distFromCenter);
+    float hillHeight = 1.5 * sin(p.x * 0.2) * cos(p.z * 0.2) + 0.5 * sin(p.z * 0.5);
+    float finalHeight = mix(0.0, hillHeight, blendFactor);
+    
+    return p.y - finalHeight;
 }
 
 float sphereDist(vec3 p,vec4 cr)
@@ -302,7 +134,6 @@ float sphereDist(vec3 p,vec4 cr)
 
 float planeDist(vec3 p,vec4 nd)
 {
-
     return dot(p,nd.xyz)-nd.w;
 }
 
@@ -311,25 +142,573 @@ Surface unionS(Surface s1,Surface s2)
     return (s1.d<s2.d)? s1:s2;
 }
 
+float sdTorus( vec3 p, vec2 t )
+{
+    vec2 q = vec2(length(p.xz)-t.x, p.y);
+    return length(q)-t.y;
+}
+
+Surface mapCalcada(vec3 p, vec3 position, vec3 size, float angleY) {
+    
+    mat4 rotation = rotY(angleY);
+    vec3 p_centered = p - position;
+    vec3 p_rotated = opTransf(p_centered, rotation);
+    
+    float distCalcada = sdBox(p_rotated, size);
+
+    vec3 corConcreto = vec3(0.6);
+    vec3 corLinha = vec3(0.4);
+    float tamanhoDoBloco = 0.2;
+    float larguraDaLinha = 0.02;
+    
+    float linhaX = smoothstep(0.0, 0.005, larguraDaLinha - min(abs(mod(p_rotated.x, tamanhoDoBloco) - tamanhoDoBloco/2.0), abs(mod(p_rotated.z, tamanhoDoBloco) - tamanhoDoBloco/2.0)));
+    float linhaZ = smoothstep(0.0, 0.005, larguraDaLinha - min(abs(mod(p_rotated.z, tamanhoDoBloco) - tamanhoDoBloco/2.0), abs(mod(p_rotated.x, tamanhoDoBloco) - tamanhoDoBloco/2.0)));
+    float linhas = max(linhaX, linhaZ);
+
+    Surface calcada;
+    calcada.color = mix(corConcreto, corLinha, linhas); 
+    calcada.smoothness = 0.1;
+    calcada.emission = vec3(0.0);
+    calcada.d = distCalcada;
+    
+    return calcada;
+}
+
 Surface getSceneDist(vec3 p)
 {
     // Titanic
-    vec3 titanicPosition = vec3(0.0, 1.5, 5.0);
-    vec3 titanicSize = vec3(0.7, 1.5, 1.3);
-    vec3 centered = p - titanicPosition - vec3(0.0, titanicSize.y, 0.0);
-    mat4 rot = rotY(radians(90.0));
-    vec3 q = opTransf(centered, rot);
-    float titanic = sdBox(q + vec3(0.0, titanicSize.y, 0.0), titanicSize);
-    Surface Titanic;
-    Titanic.color = vec3(0.8, 0.7, 0.6); // Beige color
-    Titanic.d = titanic;
+    vec3 titanicPosition = vec3(0.0, 1.0, 5.0);
+    vec3 titanicSize = vec3(6.0, 3.0, 2.0);
+    
+    vec3 p_centered_corpo = p - titanicPosition;
+    mat4 rotation_titanic = rotY(0.0); 
+    vec3 p_rotated_corpo = opTransf(p_centered_corpo, rotation_titanic);
+    
+    float corpoDist = sdBox(p_rotated_corpo, titanicSize);
+    Surface Corpo;
+    Corpo.color = vec3(0.8, 0.7, 0.6);
+    Corpo.smoothness = 0.2;
+    Corpo.emission = vec3(0.0);
+    Corpo.d = corpoDist;
 
-    // chão
+    float tetoRaio = titanicSize.z;
+    float tetoComprimento = 12;
+
+    vec3 tetoPosition = titanicPosition + vec3(0.0, titanicSize.y / 2.0 , 0.0);
+
+    vec3 p_centered_teto = p - tetoPosition;
+    mat4 rotation_teto = rotZ(90.0); 
+    vec3 p_rotated_teto = opTransf(p_centered_teto, rotation_teto);
+    
+    float tetoDist = sdCylinder(p_rotated_teto, tetoComprimento, tetoRaio);
+    Surface Teto;
+    Teto.color = vec3(0.8, 0.7, 0.6);
+    Teto.smoothness = 0.3;
+    Teto.emission = vec3(0.0);
+    Teto.d = tetoDist;
+
+
+    // Caixa da água
+    Surface CaixaAgua;
+    CaixaAgua.color = vec3(0.7, 0.7, 0.7);
+    CaixaAgua.smoothness = 0.8;
+    CaixaAgua.emission = vec3(0.0);
+
+    vec3 p_local_caixa = p - CaixaAguaPosition;
+    float distCilindro = sdCylinder(p_local_caixa, CaixaAguaHeight, CaixaAguaRadius);
+    float todasAsDistanciasAneis = maxDist;
+    vec2  tamanhoDoAnel = vec2(CaixaAguaRadius, 0.05);
+
+    for (int i = 0; i < 3; i++) {
+        float alturaAnel = (CaixaAguaHeight / 2.0 - 0.5) * (float(i) - 1.0);
+        float distAnelAtual = sdTorus(p_local_caixa - vec3(0.0, alturaAnel, 0.0), tamanhoDoAnel);
+        todasAsDistanciasAneis = min(todasAsDistanciasAneis, distAnelAtual);
+    }
+    
+    if (abs(p_local_caixa.y) < CaixaAguaHeight / 2.0) {
+        CaixaAgua.d = min(distCilindro, todasAsDistanciasAneis);
+    } else {
+        CaixaAgua.d = distCilindro;
+    }
+
+    // Auditórios
+    Surface Auditorios;
+    Auditorios.smoothness = 0.2;
+    Auditorios.emission = vec3(0.0);
+    Auditorios.color = vec3(0.3, 0.35, 0.4); 
+    vec3 AuditoriosPosition = vec3(-13.0, 1.0, 7.0);
+    vec3 AuditoriosSize = vec3(2.5, 1, 1.5);
+    vec3 p_centered_aud = p - AuditoriosPosition;
+    mat4 rotationMatrix_aud = rotY(105.0); 
+    vec3 p_rotated_aud = opTransf(p_centered_aud, rotationMatrix_aud);
+    Auditorios.d = sdBox(p_rotated_aud, AuditoriosSize);
+
+    // Biblioteca
+    Surface Biblioteca;
+    Biblioteca.smoothness = 0.2;
+    Biblioteca.emission = vec3(0.0);
+    Biblioteca.color = vec3(0.3, 0.35, 0.4); 
+    vec3 BibliotecaPosition = vec3(-9.0, 1.0, -4.0);
+    vec3 BibliotecaSize = vec3(2.5, 0.7, 1.5);
+    vec3 p_centered_bib = p - BibliotecaPosition;
+    mat4 rotationMatrix_bib = rotY(105.0); 
+    vec3 p_rotated_bib = opTransf(p_centered_bib, rotationMatrix_bib);
+    Biblioteca.d = sdBox(p_rotated_bib, BibliotecaSize);
+
+    // Queijo
+    Surface Queijo;
+    Queijo.smoothness = 0.2;
+    Queijo.color = vec3(0.8, 0.7, 0.6);
+    vec3 QueijoPosition = vec3(-11.7, 0.2, 2.0); 
+    float QueijoHeight = 0.3;            
+    float QueijoRadius = 0.6;            
+    Queijo.d = sdCylinder(p - QueijoPosition, QueijoHeight, QueijoRadius);
+
+    // Elefante Branco
+    Surface Elefante;
+    Elefante.smoothness = 0.2;
+    Elefante.emission = vec3(0.0);
+    Elefante.color = vec3(0.3, 0.35, 0.4); 
+    vec3 ElefantePosition = vec3(14.0, 1.0, 3.0);
+    vec3 ElefanteSize = vec3(4.0, 2.0, 1.5);
+    vec3 p_centered_ele = p - ElefantePosition;
+    mat4 rotationMatrix_ele = rotY(0.0); 
+    vec3 p_rotated_ele = opTransf(p_centered_ele, rotationMatrix_ele);
+    Elefante.d = sdBox(p_rotated_ele, ElefanteSize);
+
+    // Chão
     Surface Ground;
     Ground.color = vec3(0.3, 0.6, 0.2);
-    Ground.d = sdWavyGround(p);
+    Ground.smoothness = 0.1;
+    Ground.emission = vec3(0.0);
+    Ground.d = sdWavyGround(p, titanicPosition.xz);
 
-    return unionS(Ground, Titanic);
+
+    // Janelas
+    Surface materialJanelaAcesa;
+    materialJanelaAcesa.color = vec3(0.05); 
+    materialJanelaAcesa.emission = vec3(1.0, 0.8, 0.5) * 1.5;
+    materialJanelaAcesa.smoothness = 0.8; 
+
+    Surface materialJanelaApagada;
+    materialJanelaApagada.color = vec3(0.1, 0.1, 0.15);
+    materialJanelaApagada.emission = vec3(0.0);
+    materialJanelaApagada.smoothness = 0.9;
+
+    Surface Titanic = unionS(Corpo, Teto);
+    Titanic = unionS(Titanic, CaixaAgua);
+    Titanic = unionS(Titanic, Auditorios);
+    Titanic = unionS(Titanic, Biblioteca);
+    Titanic = unionS(Titanic, Queijo);
+    Titanic = unionS(Titanic, Elefante);
+
+    vec3  tamanhoDaJanela = vec3(0.3, 0.3, 0.02);
+    int   NUM_COLUNAS = 16;
+    int   NUM_FILEIRAS = 5;
+    float ESPACO_HORIZONTAL = 0.7;
+    float ESPACO_VERTICAL = 0.7;
+    vec3  inicioDaGrade = vec3(-5.2, 3.5, 3.0);
+
+    for (int j = 0; j < NUM_FILEIRAS; j++) {
+        for (int i = 0; i < NUM_COLUNAS; i++) {
+            
+            Surface janelaAtual;
+            
+            if (iTime >= 2.0 && iTime <= 5.0) {
+  
+                if (
+                    // F
+                    (i==3 && j==0) ||
+                     (i==3 && j==1) ||
+                     (i==3 && j==2) ||
+                     (i==3 && j==3) ||
+                     (i==3 && j==4)
+                     || (i==4 && j==0)
+                     || (i==5 && j==0)
+                     || (i==6 && j==0)
+                     || (i==4 && j==2)
+                     || (i==5 && j==2)
+                     || (i==6 && j==2)
+
+                     // E
+                     || (i==8 && j==0)
+                     || (i==8 && j==1)
+                     || (i==8 && j==2)
+                     || (i==8 && j==3)
+                     || (i==8 && j==4)
+                     || (i==9 && j==0)
+                     || (i==10 && j==0)
+                     || (i==11 && j==0)
+                     || (i==9 && j==2)
+                     || (i==10 && j==2)
+                     || (i==11 && j==2)
+                     || (i==9 && j==4)
+                     || (i==10 && j==4)
+                     || (i==11 && j==4)
+
+                )
+                {
+                    janelaAtual = materialJanelaAcesa;
+                } else {
+                    janelaAtual = materialJanelaApagada;
+                }
+            }
+
+            else if (iTime > 5.0 && iTime <= 7.0) { 
+                
+                if (
+
+                    // L
+                     (i==2 && j==0)
+                     || (i==2 && j==1)
+                     || (i==2 && j==2)
+                     || (i==2 && j==3)
+                     || (i==2 && j==4)
+                     || (i==3 && j==4)
+                     || (i==4 && j==4)
+                     || (i==5 && j==4)
+
+                    // I
+                    || (i==7 && j==0)
+                    || (i==7 && j==1)
+                    || (i==7 && j==2)
+                    || (i==7 && j==3)
+                    || (i==7 && j==4)
+
+                    // Z
+                    || (i==9 && j==0)
+                    || (i==10 && j==0)
+                    || (i==11 && j==0)
+                    || (i==12 && j==0)
+                    || (i==13 && j==0)
+
+                    || (i==12 && j==1)
+                    || (i==11 && j==2)
+                    || (i==10 && j==3)
+
+                    || (i==9 && j==4)
+                    || (i==10 && j==4)
+                    || (i==11 && j==4)
+                    || (i==12 && j==4)
+                    || (i==13 && j==4)
+                ) 
+                {
+                    janelaAtual = materialJanelaAcesa;
+                } else {
+                    janelaAtual = materialJanelaApagada;
+                }
+
+            }
+
+            else if (iTime > 7.0 && iTime <= 9.0) { 
+                
+                if (
+
+                    // 2
+                    (i==2 && j==0)
+                    || (i==3 && j==0)
+                    || (i==4 && j==0)
+                    || (i==5 && j==0)
+                    || (i==6 && j==0)
+
+                    || (i==6 && j==1)
+
+                    || (i==2 && j==2)
+                    || (i==3 && j==2)
+                    || (i==4 && j==2)
+                    || (i==5 && j==2)
+                    || (i==6 && j==2)
+
+                    || (i==2 && j==3)
+
+                    || (i==2 && j==4)
+                    || (i==3 && j==4)
+                    || (i==4 && j==4)
+                    || (i==5 && j==4)
+                    || (i==6 && j==4)
+
+                    // 0
+                    || (i==9 && j==0)
+                    || (i==10 && j==0)
+                    || (i==11 && j==0)
+                    || (i==12 && j==0)
+
+                    || (i==9 && j==1)
+                    || (i==9 && j==2)
+                    || (i==9 && j==3)
+                    || (i==9 && j==4)
+
+                    || (i==10 && j==4)
+                    || (i==11 && j==4)
+                    || (i==12 && j==4)
+
+                    || (i==12 && j==1)
+                    || (i==12 && j==2)
+                    || (i==12 && j==3)
+                ) 
+                {
+                    janelaAtual = materialJanelaAcesa;
+                } else {
+                    janelaAtual = materialJanelaApagada;
+                }
+
+            }
+
+            else if (iTime >  9.0 && iTime <= 11.0) { 
+
+                if (
+
+                    // A
+                    (i==4 && j==0)
+                    || (i==3 && j==1)
+                    || (i==2 && j==2)
+                    || (i==1 && j==3)
+                    || (i==0 && j==4)
+
+                    || (i==5 && j==1)
+                    || (i==6 && j==2)
+                    || (i==7 && j==3)
+                    || (i==8 && j==4)
+
+                    || (i==2 && j==3)
+                    || (i==3 && j==3)
+                    || (i==4 && j==3)
+                    || (i==5 && j==3)
+                    || (i==6 && j==3)
+
+                    // N 
+                    || (i==10 && j==0)
+                    || (i==10 && j==1)
+                    || (i==10 && j==2)
+                    || (i==10 && j==3)
+                    || (i==10 && j==4)
+
+                    || (i==15 && j==0)
+                    || (i==15 && j==1)
+                    || (i==15 && j==2)
+                    || (i==15 && j==3)
+                    || (i==15 && j==4)
+
+                    || (i==11 && j==1)
+                    || (i==12 && j==2)
+                    || (i==13 && j==3)
+                    || (i==14 && j==4)
+
+
+                ) 
+                {
+                    janelaAtual = materialJanelaAcesa;
+                } else {
+                    janelaAtual = materialJanelaApagada;
+                }
+
+            }
+
+            else if (iTime >  11.0) { 
+
+                if (
+
+                    // O
+                    (i==2 && j==0)
+                    || (i==3 && j==0)
+                    || (i==4 && j==0)
+                    || (i==5 && j==0)
+
+                    || (i==2 && j==0)
+                    || (i==2 && j==1)
+                    || (i==2 && j==2)
+                    || (i==2 && j==3)
+                    || (i==2 && j==4)
+
+                    || (i==3 && j==4)
+                    || (i==4 && j==4)
+                    || (i==5 && j==4)
+
+                    || (i==5 && j==1)
+                    || (i==5 && j==2)
+                    || (i==5 && j==3)
+
+                    // S
+                    || (i==7 && j==0)
+                    || (i==8 && j==0)
+                    || (i==9 && j==0)
+                    || (i==10 && j==0)
+                    || (i==11 && j==0)
+
+                    || (i==7 && j==1)
+
+                    || (i==7 && j==2)
+                    || (i==8 && j==2)
+                    || (i==9 && j==2)
+                    || (i==10 && j==2)
+                    || (i==11 && j==2)
+
+                    || (i==11 && j==3)
+
+                    || (i==7 && j==4)
+                    || (i==8 && j==4)
+                    || (i==9 && j==4)
+                    || (i==10 && j==4)
+                    || (i==11 && j==4)
+
+                    // !
+                    || (i==13 && j==0)
+                    || (i==13 && j==1)
+                    || (i==13 && j==2)
+
+                    || (i==13 && j==4)
+
+                ) 
+                {
+                    janelaAtual = materialJanelaAcesa;
+                } else {
+                    janelaAtual = materialJanelaApagada;
+                }
+
+            }
+
+            else {
+                janelaAtual = materialJanelaApagada;
+            }
+
+            vec3 posJanelaAtual = inicioDaGrade + vec3(float(i) * ESPACO_HORIZONTAL, -float(j) * ESPACO_VERTICAL, 0.0);
+            janelaAtual.d = sdBox(p - posJanelaAtual, tamanhoDaJanela);
+            
+            Titanic = unionS(Titanic, janelaAtual);
+        }
+    }
+
+    Surface scene = unionS(Ground, Titanic);
+
+    // Calçadas
+    Surface calcada1 = mapCalcada(
+        p,                               
+        vec3(-6.0, 0.05, -2.0),      
+        vec3(1.0, 0.1, 4.5),  
+        15.0             
+    );
+
+    Surface calcada2 = mapCalcada(
+        p,                     
+        vec3(-11.0, 0.05, 2.0),       
+        vec3(5.0, 0.1, 3.0),           
+        0.0            
+    );
+    
+  
+    Surface calcada3 = mapCalcada(
+        p,                          
+        vec3(-11.0, 0.05, 2.0),          
+        vec3(10.0, 0.1, 0.6),        
+        0.0                     
+    );
+
+    Surface calcada4 = mapCalcada(
+        p,                       
+        vec3(-11.0, 0.05, -0.5),     
+        vec3(30.0, 0.1, 0.9),            
+        0.0                    
+    );
+
+    Surface calcada5 = mapCalcada(
+        p,                        
+        vec3(8.0, 0.05, 3.0),         
+        vec3(0.8, 0.1, 4),            
+        0.0                       
+    );
+
+    Surface calcada6 = mapCalcada(
+        p,                            
+        vec3(5.0, 0.05, 3.0),     
+        vec3(3, 0.1, 1),             
+        0.0                   
+    );
+
+    scene = unionS(scene, calcada1);
+    scene = unionS(scene, calcada2);
+    scene = unionS(scene, calcada3);
+    scene = unionS(scene, calcada4);
+    scene = unionS(scene, calcada5);
+    scene = unionS(scene, calcada6);
+
+    // Pessoas
+    vec3 caminho0_ida = vec3(-10.0, 0.25, -1.1);
+    vec3 caminho0_volta   = vec3(10.0, 0.25, -1.1);
+
+    vec3 caminho1_ida = vec3(-13.0, 0.25, 3.5);
+    vec3 caminho1_volta   = vec3(5.0, 0.25, 3.5);
+
+    vec3 caminho2_ida = vec3(8.0, 0.25, 0.0);
+    vec3 caminho2_volta   = vec3(8.0, 0.25, 8.0);
+
+    // --- Pessoa 0: Roupa vermelha, indo no caminho 1 ---
+    float velocidade0 = 1.0;
+    vec3 direcaoDoCaminho0 = normalize(caminho1_volta - caminho1_ida);
+    float progressoNoCaminho0 = mod(iTime * velocidade0, distance(caminho1_ida, caminho1_volta));
+    vec3 posicaoBase0 = caminho1_ida + direcaoDoCaminho0 * progressoNoCaminho0;
+    posicaoBase0.y += 0.03 * abs(sin(iTime * 15.0));
+    Surface Tronco0 = Surface(vec3(0.8, 0.2, 0.2), sdBox(p - posicaoBase0, vec3(0.15, 0.4, 0.1)), 0.1, vec3(0.0));
+    Surface Cabeca0 = Surface(vec3(0.9, 0.7, 0.5), sdSphere(p - (posicaoBase0 + vec3(0.0, 0.4/2.0 + 0.15, 0.0)), 0.15), 0.1, vec3(0.0));
+    Surface Pessoa0 = unionS(Tronco0, Cabeca0);
+
+    // --- Pessoa 2: Roupa verde, indo no caminho 1 ---
+    float velocidade2 = 1.2;
+    vec3 direcaoDoCaminho2 = normalize(caminho1_volta - caminho1_ida);
+    float progressoNoCaminho2 = mod(iTime * velocidade2 + 2.0, distance(caminho1_ida, caminho1_volta)); // Offset
+    vec3 posicaoBase2 = caminho1_ida + direcaoDoCaminho2 * progressoNoCaminho2;
+    posicaoBase2.y += 0.03 * abs(sin(iTime * 16.0));
+    Surface Tronco2 = Surface(vec3(0.2, 0.8, 0.3), sdBox(p - posicaoBase2, vec3(0.15, 0.4, 0.1)), 0.1, vec3(0.0));
+    Surface Cabeca2 = Surface(vec3(0.8, 0.6, 0.4), sdSphere(p - (posicaoBase2 + vec3(0.0, 0.4/2.0 + 0.15, 0.0)), 0.15), 0.1, vec3(0.0));
+    Surface Pessoa2 = unionS(Tronco2, Cabeca2);
+
+    // --- Pessoa 3: Roupa roxa, indo no caminho 2 ---
+    float velocidade3 = 1.0;
+    vec3 direcaoDoCaminho3 = normalize(caminho2_volta - caminho2_ida);
+    float progressoNoCaminho3 = mod(iTime * velocidade3, distance(caminho2_ida, caminho2_volta));
+    vec3 posicaoBase3 = caminho2_ida + direcaoDoCaminho3 * progressoNoCaminho3;
+    posicaoBase3.y += 0.03 * abs(sin(iTime * 15.5));
+    Surface Tronco3 = Surface(vec3(0.5, 0.1, 0.5), sdBox(p - posicaoBase3, vec3(0.15, 0.4, 0.1)), 0.1, vec3(0.0));
+    Surface Cabeca3 = Surface(vec3(0.4, 0.2, 0.1), sdSphere(p - (posicaoBase3 + vec3(0.0, 0.4/2.0 + 0.15, 0.0)), 0.15), 0.1, vec3(0.0));
+    Surface Pessoa3 = unionS(Tronco3, Cabeca3);
+
+    // --- Pessoa 4: Roupa amarela, voltando no caminho 2 ---
+    float velocidade4 = 1.1;
+    vec3 direcaoDoCaminho4 = normalize(caminho2_ida - caminho2_volta);
+    float progressoNoCaminho4 = mod(iTime * velocidade4, distance(caminho2_ida, caminho2_volta));
+    vec3 posicaoBase4 = caminho2_volta + direcaoDoCaminho4 * progressoNoCaminho4;
+    posicaoBase4.y += 0.03 * abs(sin(iTime * 14.8));
+    Surface Tronco4 = Surface(vec3(0.9, 0.9, 0.1), sdBox(p - posicaoBase4, vec3(0.15, 0.4, 0.1)), 0.1, vec3(0.0));
+    Surface Cabeca4 = Surface(vec3(0.9, 0.7, 0.5), sdSphere(p - (posicaoBase4 + vec3(0.0, 0.4/2.0 + 0.15, 0.0)), 0.15), 0.1, vec3(0.0));
+    Surface Pessoa4 = unionS(Tronco4, Cabeca4);
+
+    // --- Pessoa 5: Roupa vermelha, indo no caminho 1 ---
+    float velocidade5 = 1.0;
+    vec3 direcaoDoCaminho5 = normalize(caminho0_volta - caminho0_ida);
+    float progressoNoCaminho5 = mod(iTime * velocidade5, distance(caminho0_ida, caminho0_volta));
+    vec3 posicaoBase5 = caminho0_ida + direcaoDoCaminho5 * progressoNoCaminho5;
+    posicaoBase5.y += 0.03 * abs(sin(iTime * 15.0));
+    Surface Tronco5 = Surface(vec3(0.8, 0.2, 0.2), sdBox(p - posicaoBase5, vec3(0.15, 0.4, 0.1)), 0.1, vec3(0.0));
+    Surface Cabeca5 = Surface(vec3(0.9, 0.7, 0.5), sdSphere(p - (posicaoBase5 + vec3(0.0, 0.4/2.0 + 0.15, 0.0)), 0.15), 0.1, vec3(0.0));
+    Surface Pessoa5 = unionS(Tronco5, Cabeca5);
+
+    // --- Pessoa 5: Roupa vermelha, indo no caminho 1 ---
+    float velocidade6 = 0.6;
+    vec3 direcaoDoCaminho6 = normalize(caminho0_ida - caminho0_volta);
+    float progressoNoCaminho6 = mod(iTime * velocidade6, distance(caminho0_volta, caminho0_ida));
+    vec3 posicaoBase6 = caminho0_volta + direcaoDoCaminho6 * progressoNoCaminho6;
+    posicaoBase6.y += 0.03 * abs(sin(iTime * 15.0));
+    Surface Tronco6 = Surface(vec3(0.8, 0.2, 0.2), sdBox(p - posicaoBase6, vec3(0.15, 0.4, 0.1)), 0.1, vec3(0.0));
+    Surface Cabeca6 = Surface(vec3(0.4, 0.2, 0.1), sdSphere(p - (posicaoBase6 + vec3(0.0, 0.4/2.0 + 0.15, 0.0)), 0.15), 0.1, vec3(0.0));
+    Surface Pessoa6 = unionS(Tronco6, Cabeca6);
+
+    scene = unionS(scene, Pessoa0);
+    scene = unionS(scene, Pessoa2);
+    scene = unionS(scene, Pessoa3);
+    scene = unionS(scene, Pessoa4);
+    scene = unionS(scene, Pessoa5);
+    scene = unionS(scene, Pessoa6);
+
+    return scene;
 }
 
 Surface rayMarching(vec3 ro,vec3 rd)
@@ -348,7 +727,7 @@ Surface rayMarching(vec3 ro,vec3 rd)
     if((i<maxIt)&&(da<maxDist))
         d_o.d =da;
     else
-        d_o.d =  maxDist;
+        d_o.d = maxDist;
     return d_o;
 }
 
@@ -356,87 +735,70 @@ vec3 estimateNormal(vec3 p)
 {
     float ep = 0.01;
     float d = getSceneDist(p).d;
-    vec3 n =vec3 (d-getSceneDist(vec3(p.x-ep,p.y,p.z)).d,d-getSceneDist(vec3(p.x,p.y-ep,p.z)).d,d-getSceneDist(vec3(p.x,p.y,p.z-ep)).d);
+    vec3 n =vec3(d-getSceneDist(vec3(p.x-ep,p.y,p.z)).d,
+                  d-getSceneDist(vec3(p.x,p.y-ep,p.z)).d,
+                  d-getSceneDist(vec3(p.x,p.y,p.z-ep)).d);
     return normalize(n);
 }
 
-
 vec3 getLight(vec3 p,Surface s,vec3 CamPos)
 {
-    float timeOfDay = getTimeOfDay();
-    vec3 sunPos = getSunPosition(timeOfDay);
-    float lightIntensity = getLightIntensity(timeOfDay);
-    
-    // Dynamic light color based on time of day
-    vec3 lColor;
-    if (timeOfDay < SUNRISE_TIME || timeOfDay > SUNSET_TIME) {
-        lColor = vec3(0.3, 0.3, 0.6); // Cool moonlight
-    } else if (timeOfDay < 0.4 || timeOfDay > 0.6) {
-        lColor = vec3(1.0, 0.7, 0.4); // Warm sunrise/sunset light
-    } else {
-        lColor = vec3(1.0, 1.0, 0.9); // Neutral daylight
-    }
-    
-    vec3 ld = normalize(sunPos - p);
+    vec3 lp = vec3 (1.0,7.0,2.0);
+    vec3 lColor= vec3(1.0);
+
+    vec3 ld = normalize(lp-p);
     vec3 n = estimateNormal(p);
-    float r = clamp(dot(ld,n), 0.0, 1.0);
+    float r =clamp(dot(ld,n),0.0,1.0);
+    float ka =0.3;
+    float kd=0.5;
+    float ks =0.20;
+    vec3 eye = normalize(CamPos - p);
+    vec3 R = reflect(-ld,n);
+    float phi = clamp(dot(R,eye),0.0,1.0);
+    float shininess = mix(8.0, 1024.0, s.smoothness);
+    vec3 col = s.emission + s.color*ka + s.color*r*kd + lColor*ks*pow(phi, shininess);
     
-    float ka = 0.2 + 0.1 * lightIntensity; // Ambient light varies with time
-    float kd = 0.5 * lightIntensity;
-    float ks = 0.20 * lightIntensity;
-    
-    vec3 eye = normalize(p - CamPos);
-    vec3 R = normalize(reflect(n, ld));
-    float phi = clamp(dot(R, eye), 0.0, 1.0);
-    
-    vec3 col = s.color * ka + s.color * r * kd + lColor * ks * pow(phi, 10.0);
-    
-    // Shadow calculation
-    Surface ss = rayMarching(p + 100.0 * minDist * n, ld);
-    if(ss.d < length(p - sunPos))
-        col *= 0.2;
+    Surface ss =rayMarching(p + n * minDist * 2.0, ld);
+    if(ss.d<length(lp-p))
+        col*=0.2;
 
     return col;
-}
-mat2 Rot(float a) //2D
-{
-    float s = sin(a);
-    float c = cos(a);
-    return mat2(c, -s, s, c);
 }
 
 mat3 setCamera(vec3 CamPos,vec3 Look_at)
 {
     vec3 cd =normalize(Look_at-CamPos);
-    vec3 cv = cross(cd,vec3(0.0,1.0,0.0));
-    vec3 cu = cross(cv,cd);
+    vec3 cv = normalize(cross(vec3(0.0,1.0,0.0),cd));
+    vec3 cu = cross(cd,cv);
     return mat3(cv,cu,cd);
 }
 
-
 void main ()
 {
-    vec2 uv = (gl_FragCoord.xy-0.5*iResolution.xy)/iResolution.xy;
-    float ra =iResolution.x/iResolution.y;
-    uv.x*=ra;
+    vec2 uv = (gl_FragCoord.xy-0.5*iResolution.xy)/iResolution.y;
+    uv.x *= iResolution.x/iResolution.y;
+
     vec2 m = iMouse.xy / iResolution.xy;
-    vec3 ro = vec3(0.0,1.0,0.0);
     vec3 Target = vec3(0.0,1.0,6.0);
-    vec3 Cam = Target -  vec3(5.0*cos(PI*0.5 +m.x*iMouse.z),-2.0,6.0*sin(PI*0.5+m.y*iMouse.z));
+    vec3 Cam = Target -  vec3(20.0*cos(PI*0.5 +m.x*iMouse.z),-5.0,16.0*sin(PI*0.5+m.y*iMouse.z));
     mat3 M =setCamera(Cam,Target);
-    vec3 rd =normalize(vec3(uv.x,uv.y,0.5));
-    rd=M*rd;
-     Surface sd = rayMarching(Cam,rd);
-    float timeOfDay = getTimeOfDay();
-    vec3 col = getSkyColor(timeOfDay, rd);
-     if (sd.d<maxDist)
-     {
-        vec3 p = Cam+sd.d*rd;
-        col  = getLight(p,sd,Cam);
+    vec3 rd = M * normalize(vec3(uv,1.0));
 
-     }
-   col = pow( col, vec3(0.4545) );
-C = vec4(col,1.0);
+    Surface sd = rayMarching(Cam,rd);
+    vec3 col = COLOR_BACKGROUND;
+    
+    if (sd.d < maxDist)
+    {
+        vec3 p = Cam + sd.d * rd;
+        Surface finalSurface = sd; 
 
+        if (finalSurface.color == vec3(0.7, 0.7, 0.7)) {
+            finalSurface = getCaixaAguaMaterial(p, finalSurface);
+        }
+
+        col = getLight(p, finalSurface, Cam);
+    }
+    
+    col = pow( col, vec3(0.4545) );
+    C = vec4(col,1.0);
 }
-
